@@ -1,0 +1,32 @@
+@if (isOpen()) {
+<div class="dialog-overlay" (click)="onClose()">
+  <div class="dialog-panel" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3>Load View</h3>
+      <button (click)="onClose()" class="dialog-close" title="Close">✕</button>
+    </div>
+    <div class="dialog-body">
+      @if (atlas.views().length === 0) {
+      <p class="empty-hint">No saved views yet. Save a view first.</p>
+      } @else {
+      <div class="view-list">
+        @for (view of atlas.views(); track view.id) {
+        <div
+          class="view-item"
+          [class.active]="view.id === atlas.selectedViewId()"
+          [class.is-default]="view.isDefault"
+          (click)="onSelectView(view.id!)"
+        >
+          <div class="view-name">{{ view.name }}</div>
+          <div class="view-meta">
+            @if (view.isDefault) { <span class="default-badge">Default</span> }
+            @if (view.description) { <span class="view-desc">{{ view.description }}</span> }
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</div>
+}

@@ -1,0 +1,532 @@
+<div class="viz-container" (window:click)="closeContextMenu()">
+  <!-- Header Controls -->
+  <div class="header-bar">
+    <!-- Sub-View Toggle: Canvas / Creator -->
+    <div class="mode-switcher">
+      <button
+        (click)="graphSubViewChange.emit('canvas')"
+        [class.active]="graphSubView() === 'canvas'"
+        title="Architecture Canvas — 3D visualization"
+      >
+        🎨 Canvas
+      </button>
+      <button
+        (click)="graphSubViewChange.emit('creator')"
+        [class.active]="graphSubView() === 'creator'"
+        title="Component Creator — Create custom component types"
+      >
+        ⚙️ Creator
+      </button>
+    </div>
+
+    @if (graphSubView() !== 'creator') {
+    <div class="graph-controls">
+      <div class="mode-switcher">
+        <button (click)="setMode('edit')" [class.active]="viewMode() === 'edit'" title="Edit Mode">✋</button>
+        <button
+          (click)="setMode('camera')"
+          [class.active]="viewMode() === 'camera' && !isSimulationActive()"
+          title="Camera Mode"
+        >
+          🎥
+        </button>
+      </div>
+
+      <!-- Active Camera Toggle: switch between two saved viewpoints -->
+      <button
+        (click)="switchCamera()"
+        [class.active]="activeCamera() === 2"
+        title="Switch Camera ({{ activeCamera() === 1 ? '1 → 2' : '2 → 1' }})"
+        class="camera-toggle-btn"
+      >
+        📷{{ activeCamera() }}
+      </button>
+
+      <button (click)="toggleSimulation()" [class.active]="isSimulationActive()" class="sim-btn" title="{{ isSimulationActive() ? 'Stop Simulation' : 'Start Simulation' }}">
+        ⚡
+      </button>
+
+      <div class="file-ops">
+        <button (click)="saveToAtlas()" title="Save a copy of the current layout with a new name">💾</button>
+        <button (click)="openLoadDialog()" title="Load a saved view">📂</button>
+      </div>
+
+      <!-- Refresh Services -->
+      <button (click)="refreshServices.emit()" title="Refresh Services" class="icon-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm10.899 12.101A7.002 7.002 0 012.399 8.567a1 1 0 011.885-.666A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Show Running Only Toggle -->
+      <button
+        (click)="showRunningOnly.set(!showRunningOnly())"
+        [title]="showRunningOnly() ? 'Show All Services' : 'Show Running Only'"
+        class="icon-btn"
+        [class.active]="showRunningOnly()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <div class="camera-controls">
+        <input
+          type="color"
+          [ngModel]="bgColor"
+          (ngModelChange)="updateBgColor($event)"
+          title="Background Color"
+        />
+        <button (click)="zoomOut()" title="Zoom Out">-</button>
+        <button (click)="zoomIn()" title="Zoom In">+</button>
+        <button (click)="rotateLeft()" title="Rotate Left">↺</button>
+        <button (click)="rotateRight()" title="Rotate Right">↻</button>
+      </div>
+
+      <button
+        (click)="vizService.toggleFloor()"
+        [class.active]="vizService.floorVisible()"
+        class="icon-btn"
+        title="Toggle Floor Grid"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5zm2 2v2h2V7H7zm4 0v2h2V7h-2zm-4 4v2h2v-2H7zm4 0v2h2v-2h-2z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Bloom Controls -->
+      <div class="bloom-controls" title="Bloom Post-Processing">
+        <button
+          (click)="vizService.toggleBloom()"
+          [class.active]="vizService.bloomEnabled()"
+          class="icon-btn"
+          [title]="vizService.bloomEnabled() ? 'Disable Bloom' : 'Enable Bloom'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 10-2 0 1 1 0 002 0zm-5 4a1 1 0 10-2 0 1 1 0 002 0zm-9.95.05a1 1 0 00.707.707l.707-.707a1 1 0 00-1.414-1.414l-.707.707a1 1 0 00-.293.707zM3 11a1 1 0 100 2 1 1 0 000-2zm.05-5.95a1 1 0 00-.707.707l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-.707-.293z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <span class="bloom-label">Bloom</span>
+        <div class="bloom-slider">
+          <label>Strength {{ vizService.bloomStrength().toFixed(2) }}</label>
+          <input
+            type="range"
+            min="0"
+            max="3"
+            step="0.05"
+            [ngModel]="vizService.bloomStrength()"
+            (ngModelChange)="vizService.setBloomStrength($event)"
+          />
+        </div>
+        <div class="bloom-slider">
+          <label>Radius {{ vizService.bloomRadius().toFixed(2) }}</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            [ngModel]="vizService.bloomRadius()"
+            (ngModelChange)="vizService.setBloomRadius($event)"
+          />
+        </div>
+        <div class="bloom-slider">
+          <label>Threshold {{ vizService.bloomThreshold().toFixed(2) }}</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            [ngModel]="vizService.bloomThreshold()"
+            (ngModelChange)="vizService.setBloomThreshold($event)"
+          />
+        </div>
+      </div>
+
+      <div class="scene-ops">
+        <button (click)="resetDemo()">Reset</button>
+        <button (click)="clearCanvas()" class="danger">Clear</button>
+      </div>
+
+      <!-- Search & Highlight -->
+      <div class="search-box">
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Search nodes..."
+          class="search-input"
+        />
+        @if (searchTerm()) {
+        <button (click)="clearSearch()" class="search-clear" title="Clear search">✕</button>
+        }
+      </div>
+
+      <!-- Layout Presets -->
+      <div class="layout-presets">
+        <button (click)="onApplyLayout('radial')" title="Radial layout" class="icon-btn">◎</button>
+        <button (click)="onApplyLayout('grid')" title="Grid layout" class="icon-btn">▦</button>
+        <button (click)="onApplyLayout('hierarchical')" title="Hierarchical layout" class="icon-btn">☰</button>
+        <button (click)="onApplyLayout('force')" title="Force-directed layout" class="icon-btn">✦</button>
+      </div>
+
+      <!-- Undo/Redo -->
+      <div class="undo-redo">
+        <button (click)="onUndo()" [disabled]="!canUndo()" title="Undo (Ctrl+Z)" class="icon-btn">↶</button>
+        <button (click)="onRedo()" [disabled]="!canRedo()" title="Redo (Ctrl+Y)" class="icon-btn">↷</button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Edge Labels Toggle -->
+      <button (click)="onToggleEdgeLabels()" [class.active]="edgeLabelsVisible()" title="Toggle edge labels (dependency type)" class="icon-btn">🏷</button>
+
+      <!-- Health Pulse Toggle -->
+      <button (click)="onToggleHealthPulse()" [class.active]="healthPulseEnabled()" title="Toggle live health pulse" class="icon-btn">❤</button>
+
+      <!-- Minimap Toggle -->
+      <button (click)="showMinimap.set(!showMinimap())" [class.active]="showMinimap()" title="Toggle mini-map" class="icon-btn">🗺</button>
+
+      <!-- Auto-Detect Systems -->
+      <button (click)="onAutoDetectSystems()" title="Auto-detect tightly-connected clusters" class="icon-btn">
+        <span style="font-size: 14px;">⊕</span>
+      </button>
+
+      <!-- Diff Mode -->
+      @if (!diffModeActive()) {
+      <button (click)="onCaptureDiffBaseline()" title="Capture diff baseline" class="icon-btn">≅</button>
+      } @else {
+      <button (click)="onClearDiffMode()" title="Clear diff mode" class="icon-btn active">≅</button>
+      }
+
+      <!-- Export -->
+      <div class="export-menu">
+        <button (click)="showExportMenu.set(!showExportMenu())" title="Export" class="icon-btn">⤓</button>
+        @if (showExportMenu()) {
+        <div class="export-dropdown">
+          <button (click)="onExportPNG()">📸 PNG Screenshot</button>
+          <button (click)="onExportJSON()">📄 JSON Topology</button>
+        </div>
+        }
+      </div>
+
+      <button
+        (click)="showDeleteConfirm.set(true)"
+        [disabled]="!selectedNodeData() && multiSelectedCount() === 0"
+        class="icon-btn danger"
+        title="Delete selected components"
+      >
+        🗑️
+      </button>
+    </div>
+    }
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="content-area" (contextmenu)="onContextMenu($event)">
+    <!-- 3D Canvas -->
+    <div #canvasContainer class="canvas-container" tabindex="0"></div>
+
+    <!-- Component Creator sub-view (overlays the canvas): left-nav library selector + editor -->
+    @if (graphSubView() === 'creator') {
+    <div class="creator-overlay">
+      <app-component-library></app-component-library>
+      <app-component-creator></app-component-creator>
+    </div>
+    }
+
+    <!-- Context Menu -->
+    @if (contextMenu().visible) {
+    <div class="context-menu" [style.left.px]="contextMenu().x" [style.top.px]="contextMenu().y">
+      <div class="menu-item has-submenu">
+        <span>New...</span>
+        <span class="arrow">▶</span>
+
+        <div class="submenu">
+          @for (tool of toolItems(); track tool.type) {
+          <button (click)="$event.stopPropagation(); onContextAction('new', tool.type)">
+            <div
+              class="tool-icon"
+              [style.background-color]="'#' + tool.defaultColor.toString(16).padStart(6, '0')"
+            ></div>
+            {{ tool.name }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Add Registered Service — only when no node is targeted -->
+      @if (!contextMenu().targetNodeId) {
+      <button (click)="onAddRegisteredService()" class="menu-item-add-service">
+        <span class="add-service-icon">⊕</span>
+        Add Registered Service...
+      </button>
+      }
+
+      <!-- Escape — shown when in drill-down mode (right-click anywhere) -->
+      @if (vizService.isDrilledDown()) {
+      <button (click)="onEscapeDrillDown()" class="menu-item-escape">
+        <span class="escape-icon">⤫</span>
+        Escape
+      </button>
+      }
+
+      <div class="menu-separator"></div>
+
+      <!-- Collapse — shown when target is a System (has children) and NOT already collapsed -->
+      @if (targetHasChildren() && !targetIsCollapsed()) {
+      <button (click)="onCollapseSystem()" class="menu-item-collapse">
+        <span class="collapse-icon">⤵</span>
+        Collapse
+      </button>
+      }
+
+      <!-- Explode — shown when target is a System and IS currently collapsed -->
+      @if (targetIsCollapsed()) {
+      <button (click)="onExplodeSystem()" class="menu-item-explode">
+        <span class="explode-icon">✸</span>
+        Explode
+      </button>
+      }
+
+      <button
+        (click)="onEditComponent()"
+        [disabled]="!contextMenu().targetNodeId"
+        class="menu-item-edit"
+      >
+        <span class="edit-icon">✏️</span>
+        Edit...
+      </button>
+      <button
+        (click)="onContextAction('delete')"
+        [disabled]="!contextMenu().targetNodeId"
+        class="danger"
+      >
+        Delete
+      </button>
+    </div>
+    }
+
+    <!-- Load View Dialog -->
+    <app-load-view-dialog
+      [isOpen]="showLoadDialog()"
+      (close)="closeLoadDialog()"
+      (viewSelected)="onSelectLoadView($event)"
+    ></app-load-view-dialog>
+
+    <!-- Add Registered Service Dialog -->
+    <app-add-service-dialog
+      [isOpen]="showAddServiceDialog()"
+      [existingNodeIds]="existingNodeIds()"
+      (close)="showAddServiceDialog.set(false)"
+      (serviceSelected)="onServiceSelected($event)"
+    ></app-add-service-dialog>
+
+    <!-- Mini-map -->
+    <app-minimap [isOpen]="showMinimap()"></app-minimap>
+
+    <!-- Drag-to-Connect Direction Popup -->
+    @if (showConnDirectionPopup()) {
+    <div class="conn-direction-popup-overlay" (click)="cancelDragConnection()">
+      <div
+        class="conn-direction-popup"
+        [style.left.px]="connPopupPos().x"
+        [style.top.px]="connPopupPos().y"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="conn-popup-label">Connection Direction</div>
+        <div class="conn-popup-buttons">
+          <button (click)="confirmDragConnection('bidirectional')" class="conn-dir-btn conn-dir-bidir active" title="Bidirectional (default)">
+            ↔
+          </button>
+          <button (click)="confirmDragConnection('out')" class="conn-dir-btn conn-dir-out" title="Outbound (→)">
+            →
+          </button>
+          <button (click)="confirmDragConnection('in')" class="conn-dir-btn conn-dir-in" title="Inbound (←)">
+            ←
+          </button>
+        </div>
+        <div class="conn-popup-hint">↔ Bidirectional (default) · auto-apply in 4s</div>
+      </div>
+    </div>
+    }
+
+    <!-- Auto-Detect Systems Popup -->
+    @if (showAutoDetectPopup()) {
+    <div class="dialog-overlay" (click)="showAutoDetectPopup.set(false)">
+      <div class="dialog-panel" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>Auto-Detected Clusters</h3>
+          <button (click)="showAutoDetectPopup.set(false)" class="dialog-close">✕</button>
+        </div>
+        <div class="dialog-body">
+          <p class="hint">{{ detectedSystems().length }} tightly-connected cluster(s) detected via strongly connected components analysis.</p>
+          @for (cluster of detectedSystems(); track $index) {
+          <div class="detected-cluster">
+            <div class="cluster-info">
+              <strong>Cluster {{ $index + 1 }}</strong>
+              <span class="cluster-count">{{ cluster.length }} nodes</span>
+            </div>
+            <div class="cluster-members">
+              @for (memberId of cluster; track memberId) {
+              <span class="cluster-member">{{ vizService.getNode(memberId)?.label ?? memberId }}</span>
+              }
+            </div>
+            <button (click)="onCollapseDetected(cluster)" class="cluster-collapse-btn">
+              ⤵ Collapse
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Delete Confirmation Dialog -->
+    @if (showDeleteConfirm()) {
+    <div class="dialog-overlay" (click)="showDeleteConfirm.set(false)">
+      <div class="dialog-panel" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>Delete {{ multiSelectedCount() > 1 ? multiSelectedCount() + ' Components' : 'Component' }}</h3>
+          <button (click)="showDeleteConfirm.set(false)" class="dialog-close">✕</button>
+        </div>
+        <div class="dialog-body">
+          @if (multiSelectedCount() > 1) {
+            <p>Are you sure you want to delete <strong>{{ multiSelectedCount() }} components</strong>?</p>
+          } @else {
+            <p>Are you sure you want to delete <strong>{{ selectedNodeData()?.label }}</strong>?</p>
+          }
+          <p class="hint">This action cannot be undone.</p>
+          <div class="dialog-actions">
+            <button (click)="showDeleteConfirm.set(false)" class="dialog-cancel">Cancel</button>
+            <button (click)="confirmDelete()" class="dialog-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Left Sidebar: Object Inspector (canvas view only — no component selector) -->
+    @if (showInternalPanels() && graphSubView() !== 'creator') {
+    <div class="sidebar left" [class.collapsed]="!isInspectorOpen()">
+      <button (click)="toggleInspector()" class="sidebar-toggle">
+        {{ isInspectorOpen() ? '◀' : '▶' }}
+      </button>
+
+      <div class="sidebar-content">
+        @if (selectedNodeData(); as node) {
+        <div class="inspector">
+
+          <div class="field-group">
+            <label>Name</label>
+            <input
+              #labelInput
+              type="text"
+              [ngModel]="formLabel"
+              (ngModelChange)="formLabel = $event; onFormChange()"
+            />
+          </div>
+          <div class="field-group">
+            <label>Description</label>
+            <textarea
+              [ngModel]="formDesc"
+              (ngModelChange)="formDesc = $event; onFormChange()"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="field-group">
+            <label>Color</label>
+            <div class="color-row">
+              <input
+                type="color"
+                [ngModel]="formColor"
+                (ngModelChange)="formColor = $event; onFormChange()"
+              />
+              <input
+                type="text"
+                [ngModel]="formColor"
+                (ngModelChange)="formColor = $event; onFormChange()"
+              />
+            </div>
+          </div>
+
+          <div class="section-header">TRANSFORM</div>
+          <div class="transform-grid">
+            <div>
+              <label class="axis-x">X</label>
+              <input
+                type="number"
+                [ngModel]="formX"
+                (ngModelChange)="formX = $event; onFormChange()"
+              />
+            </div>
+            <div>
+              <label class="axis-y">Y</label>
+              <input
+                type="number"
+                [ngModel]="formY"
+                (ngModelChange)="formY = $event; onFormChange()"
+              />
+            </div>
+            <div>
+              <label class="axis-z">Z</label>
+              <input
+                type="number"
+                [ngModel]="formZ"
+                (ngModelChange)="formZ = $event; onFormChange()"
+              />
+            </div>
+          </div>
+
+          <div class="section-header">CONNECTIONS</div>
+          <div class="connection-add">
+            <select [(ngModel)]="selectedTargetId">
+              <option value="" disabled selected>Connect to...</option>
+              @for (target of availableTargets(); track target.id) {
+              <option [value]="target.id">{{ target.label }}</option>
+              }
+            </select>
+            <button (click)="addConnection('out')" [disabled]="!selectedTargetId" title="Add outbound (→)">→</button>
+            <button (click)="addConnection('in')" [disabled]="!selectedTargetId" title="Add inbound (←)">←</button>
+            <button (click)="addConnection('bidirectional')" [disabled]="!selectedTargetId" title="Add bidirectional (↔)">↔</button>
+          </div>
+
+          <div class="connection-list">
+            @for (conn of allConnections(); track conn.nodeId) {
+            <div class="connection-item">
+              <span class="conn-dir-badge" [class.dir-out]="conn.direction === 'out'" [class.dir-in]="conn.direction === 'in'" [class.dir-bidi]="conn.direction === 'bidirectional'">
+                @if (conn.direction === 'out') {→}
+                @if (conn.direction === 'in') {←}
+                @if (conn.direction === 'bidirectional') {↔}
+              </span>
+              <span class="conn-label">{{ conn.label }}</span>
+              <div class="conn-actions">
+                <button (click)="toggleConnectionDirection(conn.nodeId, conn.direction)" title="Toggle direction">
+                  {{ conn.direction === 'bidirectional' ? '→' : '↔' }}
+                </button>
+                <button (click)="removeConnection(conn.nodeId)" class="conn-remove">✕</button>
+              </div>
+            </div>
+            } @if (allConnections().length === 0) {
+            <div class="empty-connections">No connections</div>
+            }
+          </div>
+        </div>
+        } @else {
+        <div class="no-selection">
+          <div class="icon">⬚</div>
+          <p>No object selected</p>
+          <p class="hint">Click to Select</p>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Toast notification -->
+  @if (toastVisible()) {
+  <div class="save-toast" [class.error]="toastIsError()">
+    {{ toastMessage() }}
+  </div>
+  }
+</div>

@@ -1,0 +1,15 @@
+@if (isVisible()) {
+<div class="minimap-container">
+  <div class="minimap-header">
+    <span class="minimap-title">🗺 Mini-map</span>
+    <span class="minimap-count">{{ allNodes().length }} nodes</span>
+  </div>
+  <canvas
+    #minimapCanvas
+    width="200"
+    height="200"
+    class="minimap-canvas"
+    (click)="onClick($event)"
+  ></canvas>
+</div>
+}

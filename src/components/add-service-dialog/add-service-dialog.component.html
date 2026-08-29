@@ -1,0 +1,81 @@
+@if (isOpen()) {
+<div class="dialog-overlay" (click)="onClose()">
+  <div class="dialog-panel" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3>Add Registered Service</h3>
+      <button (click)="onClose()" class="dialog-close" title="Close">✕</button>
+    </div>
+    <div class="dialog-body">
+      <!-- Search -->
+      <div class="search-bar">
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Search by name, type, or framework..."
+          class="search-input"
+          autofocus
+        />
+        <span class="search-count">{{ filteredServices().length }} available</span>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading services from registry...</p>
+      </div>
+      }
+
+      <!-- Error -->
+      @if (error(); as err) {
+      <div class="error-state">
+        <span class="error-icon">⚠</span>
+        <p>{{ err }}</p>
+        <button (click)="fetchServices(); $event.stopPropagation()" class="retry-btn">Retry</button>
+      </div>
+      }
+
+      <!-- Service List -->
+      @if (!loading() && !error()) {
+        @if (filteredServices().length === 0) {
+        <div class="empty-state">
+          @if (allServices().length === 0) {
+            <p>No services found in the registry.</p>
+          } @else {
+            <p>All registered services are already in the graph.</p>
+          }
+        </div>
+        } @else {
+        <div class="service-list">
+          @for (service of filteredServices(); track service.id) {
+          <div
+            class="service-item"
+            (click)="onSelectService(service)"
+            (mouseenter)="$event.stopPropagation()"
+          >
+            <div class="service-info">
+              <div class="service-name">{{ service.name }}</div>
+              <div class="service-meta">
+                <span class="meta-tag type-tag">{{ service.type?.name ?? 'Unknown' }}</span>
+                @if (service.framework?.name) {
+                <span class="meta-tag framework-tag">{{ service.framework.name }}</span>
+                }
+                @if (service.defaultPort) {
+                <span class="meta-tag port-tag">:{{ service.defaultPort }}</span>
+                }
+              </div>
+            </div>
+            <div class="service-actions">
+              <span class="status-badge" [class]="statusClass(service.status)">{{ service.status }}</span>
+              <span class="add-icon">+</span>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+}

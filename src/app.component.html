@@ -1,0 +1,14 @@
+<div class="flex h-screen w-screen antialiased text-[rgb(var(--color-text-base))] bg-[rgb(var(--color-background))] overflow-hidden">
+  <!-- Atlas 3D Services Mesh Viewer — canvas + component creator only -->
+  <app-service-graph
+    [services]="services()"
+    [dependencies]="dependencies()"
+    [deployments]="deployments()"
+    [showInternalPanels]="true"
+    [graphSubView]="graphSubView()"
+    [(showRunningOnly)]="showRunningOnly"
+    (graphSubViewChange)="onGraphSubViewChange($event)"
+    (refreshServices)="onRefreshServices()"
+    class="flex-1 min-w-0 min-h-0"
+  ></app-service-graph>
+</div>

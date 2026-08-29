@@ -1,0 +1,45 @@
+.minimap-container {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 220px;
+  background: rgba(10, 15, 30, 0.9);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.minimap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.minimap-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.minimap-count {
+  font-size: 10px;
+  color: #64748b;
+  background: rgba(51, 65, 85, 0.5);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+.minimap-canvas {
+  width: 200px;
+  height: 200px;
+  border-radius: 6px;
+  cursor: crosshair;
+  display: block;
+}
