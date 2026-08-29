@@ -1,0 +1,17 @@
+[Unit]
+Description=atlas-ui — Angular dev server (port 4216)
+Documentation=https://github.com/markpippins/atlas-ui
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/codex/dev/nexus/angular/atlas-ui
+Environment=NODE_ENV=development
+Environment=PORT=4216
+ExecStart=/home/codex/.nvm/versions/node/v24.15.0/bin/npm start
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
