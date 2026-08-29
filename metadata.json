@@ -1,5 +1,6 @@
 {
   "name": "Nexus",
-  "description": "A web-based file explorer clone that allows you to navigate a virtual file system, inspired by the Windows Explorer interface.",
-  "requestFramePermissions": []
+  "description": "Atlas 3D service mesh visualization and administration console for managing services, host servers, deployments, and configurations across infrastructure.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

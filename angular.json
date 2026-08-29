@@ -33,7 +33,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {			"port": 4216,
+          "options": {
+            "port": 3000,
+            "host": "0.0.0.0",
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {

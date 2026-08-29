@@ -2,11 +2,12 @@
   "name": "nexus",
   "version": "0.0.0",
   "scripts": {
-    "ng": "./node_modules/@angular/cli/bin/ng.js",
-    "start": "./node_modules/@angular/cli/bin/ng.js serve",
-    "build": "./node_modules/@angular/cli/bin/ng.js build",
-    "watch": "./node_modules/@angular/cli/bin/ng.js build --watch --configuration development",
-    "test": "./node_modules/@angular/cli/bin/ng.js test"
+    "ng": "ng",
+    "dev": "ng serve --host 0.0.0.0 --port 3000",
+    "start": "ng serve --host 0.0.0.0 --port 3000",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
   },
   "prettier": {
     "printWidth": 100,
@@ -34,7 +35,6 @@
     "@xterm/addon-fit": "^0.11.0",
     "idb": "^8.0.0",
     "just-bash": "^2.14.2",
-    "nexus-lookup-client": "file:../../typespec/tsp-output/clients/js",
     "rxjs": "~7.8.0",
     "three": "^0.182.0",
     "tslib": "^2.3.0",
@@ -47,7 +47,6 @@
     "@angular/compiler-cli": "^20.3.0",
     "@angular/platform-browser-dynamic": "^20.0.7",
     "@google/genai": "^0.14.0",
-    "@types/bun": "latest",
     "@types/jasmine": "~5.1.0",
     "concurrently": "^9.1.0",
     "jasmine-core": "~5.9.0",
